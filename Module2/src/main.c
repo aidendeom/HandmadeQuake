@@ -2,7 +2,16 @@
 
 LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	switch (uMsg)
+	{
+	case WM_CLOSE:
+		PostQuitMessage(0);
+		break;
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+
+	return 0;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
@@ -14,7 +23,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.lpszClassName = "Module 2";
 
 	if (!RegisterClass(&wc))
+	{
+		MessageBox(NULL, "RegisterClass failed", "Module 2", 0);
 		return EXIT_FAILURE;
+	}
 
 	HWND mainWindow;
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;
@@ -46,5 +58,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PatBlt(ctx, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainWindow, ctx);
 
-	return 0;
+	MSG msg;
+	while (GetMessage(&msg, NULL, 0, 0))
+	{
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+	return (int)msg.wParam;
 }
