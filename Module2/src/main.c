@@ -1,17 +1,25 @@
 #include <windows.h>
 
+BOOL isRunning = TRUE;
+
 LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+	LRESULT res = 0;
+
 	switch (uMsg)
 	{
+	case WM_KEYDOWN:
+		if (wParam == VK_ESCAPE)
+			isRunning = FALSE;
+		break;
 	case WM_CLOSE:
-		PostQuitMessage(0);
+		isRunning = FALSE;
 		break;
 	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+		res = DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	return 0;
+	return res;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
@@ -31,8 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND mainWindow;
 	DWORD windowStyle = WS_OVERLAPPEDWINDOW;
 
-	RECT r;
-	r.top = r.left = 0;
+	RECT r = { 0 };
 	r.right = 800;
 	r.bottom = 600;
 
@@ -59,11 +66,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ReleaseDC(mainWindow, ctx);
 
 	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0))
+	while (isRunning)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
 	}
 
-	return (int)msg.wParam;
+	return 0;
 }
