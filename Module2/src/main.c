@@ -1,11 +1,40 @@
 #include <windows.h>
 #include <stdio.h>
 
-BOOL isRunning = TRUE;
+static BOOL isRunning = TRUE;
 
 void Sys_Shutdown()
 {
 	isRunning = FALSE;
+}
+
+
+static BOOL timeInitialized = FALSE;
+static __int64 ticksPerSecond = 0;
+static __int64 ticksAtProgramStart = 0;
+
+/*
+* Get the number of seconds since program start
+*/
+float Sys_GetFloatTime()
+{
+	LARGE_INTEGER t;
+	QueryPerformanceCounter(&t);
+
+	if (!timeInitialized)
+	{
+		LARGE_INTEGER frequency;
+		QueryPerformanceFrequency(&frequency);
+		ticksPerSecond = frequency.QuadPart;
+
+		ticksAtProgramStart = t.QuadPart;
+		timeInitialized = TRUE;
+	}
+
+	__int64 tickDiff = t.QuadPart - ticksAtProgramStart;
+	double secDiff = (double)tickDiff / ticksPerSecond;
+
+	return (float)secDiff;
 }
 
 LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -77,13 +106,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PatBlt(ctx, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainWindow, ctx);
 
-	LARGE_INTEGER frequency;
-	QueryPerformanceFrequency(&frequency);
-
-	LARGE_INTEGER t1;
-	LARGE_INTEGER t2;
-	QueryPerformanceCounter(&t1);
-
 	MSG msg;
 	while (isRunning)
 	{
@@ -93,10 +115,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DispatchMessage(&msg);
 		}
 
-		QueryPerformanceCounter(&t2);
-		__int64 tickDiff = t2.QuadPart - t1.QuadPart;
-		double secDiff = (double)tickDiff / frequency.QuadPart;
-		QueryPerformanceCounter(&t1);
+		float seconds = Sys_GetFloatTime();
+
+		char buff[64];
+		sprintf_s(buff, 64, "Time: %3.7f\n", seconds);
+		OutputDebugString(buff);
+
+		Sleep(10);
 	}
 
 	return 0;
