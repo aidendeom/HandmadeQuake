@@ -3,6 +3,11 @@
 
 BOOL isRunning = TRUE;
 
+void Sys_Shutdown()
+{
+	isRunning = FALSE;
+}
+
 LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	LRESULT res = 0;
@@ -14,7 +19,8 @@ LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			isRunning = FALSE;
 		break;
 	case WM_CLOSE:
-		isRunning = FALSE;
+		Sys_Shutdown();
+		PostQuitMessage(0);
 		break;
 	default:
 		res = DefWindowProc(hWnd, uMsg, wParam, lParam);
@@ -29,11 +35,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	wc.lpfnWndProc = MainWinProc;
 	wc.hInstance = hInstance;
 	wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wc.lpszClassName = "Module 2";
+	wc.lpszClassName = "QuakeWindow";
 
 	if (!RegisterClass(&wc))
 	{
-		MessageBox(NULL, "RegisterClass failed", "Module 2", 0);
+		MessageBox(NULL, "RegisterClass failed", "Initialization Failure", 0);
 		return EXIT_FAILURE;
 	}
 
@@ -43,12 +49,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RECT r = { 0 };
 	r.right = 800;
 	r.bottom = 600;
-
 	AdjustWindowRect(&r, windowStyle, FALSE);
 
 	mainWindow = CreateWindowEx(
 		0,
-		"Module 2",
+		"QuakeWindow",
 		"Lesson 2.4",
 		windowStyle,
 		CW_USEDEFAULT,
@@ -59,6 +64,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		NULL,
 		hInstance,
 		NULL);
+
+	if (!mainWindow)
+	{
+		MessageBox(NULL, "CreateWindow failed", "Initialization Failure", 0);
+		return EXIT_FAILURE;
+	}
 
 	ShowWindow(mainWindow, SW_SHOWDEFAULT);
 
@@ -76,7 +87,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	MSG msg;
 	while (isRunning)
 	{
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
@@ -85,7 +96,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		QueryPerformanceCounter(&t2);
 		__int64 tickDiff = t2.QuadPart - t1.QuadPart;
 		double secDiff = (double)tickDiff / frequency.QuadPart;
-
 		QueryPerformanceCounter(&t1);
 	}
 
