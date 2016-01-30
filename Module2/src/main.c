@@ -49,7 +49,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	mainWindow = CreateWindowEx(
 		0,
 		"Module 2",
-		"Lesson 2.3",
+		"Lesson 2.4",
 		windowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -81,8 +81,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-		Sleep(10000);
 
 		QueryPerformanceCounter(&t2);
 		__int64 tickDiff = t2.QuadPart - t1.QuadPart;
