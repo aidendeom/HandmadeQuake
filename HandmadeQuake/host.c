@@ -1,5 +1,3 @@
-#include "host.h"
-
 void Host_Init()
 {
 
