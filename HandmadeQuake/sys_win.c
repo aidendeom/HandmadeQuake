@@ -6,7 +6,7 @@ static float TARGET_TIMESTEP = 1.0f / TARGET_FRAMERATE;
 
 static BOOL isRunning = TRUE;
 
-void Sys_Shutdown()
+void Sys_Shutdown(void)
 {
 	isRunning = FALSE;
 }
@@ -62,6 +62,11 @@ LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd)
 {
+	// Make compiler happy
+	lpCmdLine;
+	nShowCmd;
+	hPrevInstance;
+
 	WNDCLASS wc = { 0 };
 	wc.lpfnWndProc = MainWinProc;
 	wc.hInstance = hInstance;
@@ -111,7 +116,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	Host_Init();
 
 	float oldtime = Sys_FloatTime();
-	float timeAccumulated = 0.0f;
 
 	MSG msg;
 	while (isRunning)
@@ -123,16 +127,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		}
 
 		float newtime = Sys_FloatTime();
-		float deltatime = newtime - oldtime;
-		timeAccumulated += deltatime;
+		Host_Frame(newtime - oldtime);
 		oldtime = newtime;
-
-		if (timeAccumulated >= TARGET_TIMESTEP)
-		{
-			Host_Frame(TARGET_TIMESTEP);
-			timeAccumulated -= TARGET_TIMESTEP;
-		}
 	}
+
+	Host_Shutdown();
 
 	return 0;
 }
