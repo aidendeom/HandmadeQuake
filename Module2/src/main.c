@@ -1,6 +1,11 @@
 #include <windows.h>
 #include <stdio.h>
 
+#include "host.h"
+
+enum { TARGET_FRAMERATE = 60 };
+static float TARGET_TIMESTEP = 1.0f / TARGET_FRAMERATE;
+
 static BOOL isRunning = TRUE;
 
 void Sys_Shutdown()
@@ -8,14 +13,10 @@ void Sys_Shutdown()
 	isRunning = FALSE;
 }
 
-
 static BOOL timeInitialized = FALSE;
 static __int64 ticksPerSecond = 0;
 static __int64 ticksAtProgramStart = 0;
 
-/*
-* Get the number of seconds since program start
-*/
 float Sys_GetFloatTime()
 {
 	LARGE_INTEGER t;
@@ -106,6 +107,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PatBlt(ctx, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainWindow, ctx);
 
+	Host_Init();
+
+	float oldtime = Sys_GetFloatTime();
+	float timeAccumulated = 0.0f;
+
 	MSG msg;
 	while (isRunning)
 	{
@@ -115,13 +121,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DispatchMessage(&msg);
 		}
 
-		float seconds = Sys_GetFloatTime();
+		float newtime = Sys_GetFloatTime();
+		float deltatime = newtime - oldtime;
+		timeAccumulated += deltatime;
+		oldtime = newtime;
 
-		char buff[64];
-		sprintf_s(buff, 64, "Time: %3.7f\n", seconds);
-		OutputDebugString(buff);
-
-		Sleep(10);
+		if (timeAccumulated >= TARGET_TIMESTEP)
+		{
+			Host_Frame(TARGET_TIMESTEP);
+			timeAccumulated -= TARGET_TIMESTEP;
+		}
 	}
 
 	return 0;
