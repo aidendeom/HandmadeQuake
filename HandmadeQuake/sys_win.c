@@ -1,3 +1,5 @@
+#ifdef WIN32
+
 #include "quakedef.h"
 #include "winquake.h"
 
@@ -135,3 +137,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	return 0;
 }
+
+#endif

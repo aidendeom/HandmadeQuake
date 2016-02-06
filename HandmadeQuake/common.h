@@ -1,7 +1,10 @@
 #pragma once
 
-#define MAX_NUM_ARGVS 50
+#undef true
+#undef false
+typedef enum { false = 0, true = 1 } qboolean;
 
+#define MAX_NUM_ARGVS 50
 extern size_t com_argc;
 extern char* com_argv[MAX_NUM_ARGVS + 1];
 

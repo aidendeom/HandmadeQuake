@@ -67,7 +67,7 @@ int Q_atoi(const char *str)
 	if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
 	{
 		str += 2;
-		while (1)
+		for (;;)
 		{
 			c = *str;
 			str++;
@@ -83,7 +83,7 @@ int Q_atoi(const char *str)
 	}
 
 	// decimal
-	while (1)
+	for (;;)
 	{
 		c = *str;
 		str++;
