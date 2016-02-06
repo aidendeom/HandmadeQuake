@@ -110,22 +110,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	PatBlt(ctx, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainWindow, ctx);
 
-	if (!AllocConsole())
-	{
-		DWORD err = GetLastError();
-		char* buf = NULL;
-		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-					  NULL,
-					  err,
-					  0,
-					  buf,
-					  512,
-					  NULL);
-		MessageBox(NULL, buf, TEXT("AllocConsole failure"), 0);
-
-		return EXIT_FAILURE;
-	}
-
 	Host_Init();
 
 	float oldtime = Sys_FloatTime();
