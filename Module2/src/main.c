@@ -59,10 +59,6 @@ LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		res = DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
 
-	char buf[128];
-	sprintf_s(buf, 128, "uMsg:   %d\nwParam: %d\nlParam: %d\n\n", uMsg, wParam, lParam);
-	OutputDebugString(buf);
-
 	return res;
 }
 
@@ -113,6 +109,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HDC ctx = GetDC(mainWindow);
 	PatBlt(ctx, 0, 0, 800, 600, BLACKNESS);
 	ReleaseDC(mainWindow, ctx);
+
+	if (!AllocConsole())
+	{
+		DWORD err = GetLastError();
+		char* buf = NULL;
+		FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+					  NULL,
+					  err,
+					  0,
+					  buf,
+					  512,
+					  NULL);
+		MessageBox(NULL, buf, TEXT("AllocConsole failure"), 0);
+
+		return EXIT_FAILURE;
+	}
 
 	Host_Init();
 

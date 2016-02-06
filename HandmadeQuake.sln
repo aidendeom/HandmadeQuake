@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Module1", "Module1\Module1.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Module2", "Module2\Module2.vcxproj", "{0D4757F5-E0B3-4AB7-AA28-4F6A4CE2F777}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HandmadeQuake", "HandmadeQuake\HandmadeQuake.vcxproj", "{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{0D4757F5-E0B3-4AB7-AA28-4F6A4CE2F777}.Release|x64.Build.0 = Release|x64
 		{0D4757F5-E0B3-4AB7-AA28-4F6A4CE2F777}.Release|x86.ActiveCfg = Release|Win32
 		{0D4757F5-E0B3-4AB7-AA28-4F6A4CE2F777}.Release|x86.Build.0 = Release|Win32
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Debug|x64.ActiveCfg = Debug|x64
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Debug|x64.Build.0 = Debug|x64
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Debug|x86.ActiveCfg = Debug|Win32
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Debug|x86.Build.0 = Debug|Win32
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Release|x64.ActiveCfg = Release|x64
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Release|x64.Build.0 = Release|x64
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Release|x86.ActiveCfg = Release|Win32
+		{C0EB92E7-E4CF-4AFD-82D4-286B84A5BF2D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
