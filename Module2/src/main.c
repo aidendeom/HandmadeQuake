@@ -13,12 +13,13 @@ void Sys_Shutdown()
 	isRunning = FALSE;
 }
 
-static BOOL timeInitialized = FALSE;
-static __int64 ticksPerSecond = 0;
-static __int64 ticksAtProgramStart = 0;
-
-float Sys_GetFloatTime()
+float Sys_FloatTime()
 {
+	static BOOL timeInitialized = FALSE;
+	static __int64 ticksPerSecond = 0;
+	static __int64 ticksAtProgramStart = 0;
+
+	double secDiff = 0.0;
 	LARGE_INTEGER t;
 	QueryPerformanceCounter(&t);
 
@@ -31,9 +32,11 @@ float Sys_GetFloatTime()
 		ticksAtProgramStart = t.QuadPart;
 		timeInitialized = TRUE;
 	}
-
-	__int64 tickDiff = t.QuadPart - ticksAtProgramStart;
-	double secDiff = (double)tickDiff / ticksPerSecond;
+	else
+	{
+		__int64 tickDiff = t.QuadPart - ticksAtProgramStart;
+		secDiff = (double)tickDiff / ticksPerSecond;
+	}
 
 	return (float)secDiff;
 }
@@ -55,6 +58,10 @@ LRESULT CALLBACK MainWinProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	default:
 		res = DefWindowProc(hWnd, uMsg, wParam, lParam);
 	}
+
+	char buf[128];
+	sprintf_s(buf, 128, "uMsg:   %d\nwParam: %d\nlParam: %d\n\n", uMsg, wParam, lParam);
+	OutputDebugString(buf);
 
 	return res;
 }
@@ -84,7 +91,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	mainWindow = CreateWindowEx(
 		0,
 		"QuakeWindow",
-		"Lesson 2.4",
+		"Module 2",
 		windowStyle,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -109,7 +116,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	Host_Init();
 
-	float oldtime = Sys_GetFloatTime();
+	float oldtime = Sys_FloatTime();
 	float timeAccumulated = 0.0f;
 
 	MSG msg;
@@ -121,7 +128,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			DispatchMessage(&msg);
 		}
 
-		float newtime = Sys_GetFloatTime();
+		float newtime = Sys_FloatTime();
 		float deltatime = newtime - oldtime;
 		timeAccumulated += deltatime;
 		oldtime = newtime;
