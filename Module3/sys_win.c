@@ -1,12 +1,34 @@
 #include <windows.h>
 #include <stdio.h>
+#include <stdint.h>
 
-unsigned long bufferWidth = 640;
-unsigned long bufferHeight = 480;
+static int bufferWidth = 640;
+static int bufferHeight = 480;
+static int bytesPerPixel = 4;
 static int isRunning = 1;
-void* backBuffer = NULL;
 
+typedef struct PixelColor_t
+{
+	// Funky windows layout
+	uint8_t b,
+			g,
+			r,
+			a;
+} PixelColor;
+
+PixelColor* m_backBuffer = NULL;
 BITMAPINFO bitmapInfo = { 0 };
+
+void DrawRect(int a_StartX, int a_StartY, int a_Width, int a_Height, PixelColor a_Color, PixelColor* a_Buffer)
+{
+	for (int h = a_StartY; h < a_StartY + a_Height; ++h)
+	{
+		for (int w = a_StartX; w < a_StartX + a_Width; ++w)
+		{
+			a_Buffer[h * bufferWidth + w] = a_Color;
+		}
+	}
+}
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara)
 {
@@ -90,13 +112,14 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		BITMAPINFOHEADER* h = &bitmapInfo.bmiHeader;
 		h->biSize = sizeof(*h);
 		h->biWidth = bufferWidth;
-		h->biHeight = bufferHeight;
+		h->biHeight = -bufferHeight;
 		h->biPlanes = 1;
 		h->biBitCount = 32;
 		h->biCompression = BI_RGB;
 	}
 
-	backBuffer = malloc(bufferWidth * bufferHeight * 4);
+	m_backBuffer = (PixelColor*)malloc(bufferWidth * bufferHeight * bytesPerPixel);
+	PixelColor* const backBuffer = m_backBuffer;
 	if (!backBuffer)
 	{
 		MessageBox(NULL, "Failed to malloc backBuffer", "Failure", 0);
@@ -113,19 +136,23 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			DispatchMessage(&msg);
 		}
 
-		int* ptr = (int*)backBuffer;
-		for (size_t h = 0; h < bufferHeight; ++h)
+		PixelColor* ptr = backBuffer;
+		for (int h = 0; h < bufferHeight; ++h)
 		{
-			for (size_t w = 0; w < bufferWidth; ++w)
+			for (int w = 0; w < bufferWidth; ++w)
 			{
-				char red = rand() % 256;
-				char green = rand() % 256;
-				char blue = rand() % 256;
+				PixelColor pc = { 0 };
+				pc.r = rand() % 256;
+				pc.g = rand() % 256;
+				pc.b = rand() % 256;
 
-				*ptr = ((red << 16) | (green << 8) | blue << 0);
-				ptr++;
+				*ptr++ = pc;
 			}
 		}
+
+		PixelColor pc = { 0 };
+		pc.r = 255;
+		DrawRect(100, 100, 100, 100, pc, backBuffer);
 
 		HDC dc = GetDC(mainWindow);
 
