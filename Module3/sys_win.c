@@ -1,11 +1,8 @@
 #include <windows.h>
+#include <stdio.h>
 
-enum /* Constants */
-{
-	WINDOW_WIDTH = 640,
-	WINDOW_HEIGHT = 480,
-};
-
+unsigned long bufferWidth = 640;
+unsigned long bufferHeight = 480;
 static int isRunning = 1;
 void* backBuffer = NULL;
 
@@ -17,6 +14,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara)
 
 	switch (uMsg)
 	{
+	case WM_DESTROY:
 	case WM_KEYUP:
 		isRunning = 0;
 		break;
@@ -41,9 +39,30 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	DWORD extendedStyle = 0;
 	DWORD style = WS_OVERLAPPEDWINDOW;
 
+	BOOL fullScreen = TRUE;
+	if (fullScreen)
+	{
+		DEVMODE dmScreenSettings = { 0 };
+		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
+		dmScreenSettings.dmPelsWidth = bufferWidth;
+		dmScreenSettings.dmPelsHeight = bufferHeight;
+		dmScreenSettings.dmBitsPerPel = 32;
+		dmScreenSettings.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+
+		if (ChangeDisplaySettings(&dmScreenSettings, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL)
+		{
+			extendedStyle = WS_EX_APPWINDOW;
+			style = WS_POPUP;
+		}
+		else
+		{
+			fullScreen = FALSE;
+		}
+	}
+
 	RECT r = { 0 };
-	r.right = WINDOW_WIDTH;
-	r.bottom = WINDOW_HEIGHT;
+	r.right = bufferWidth;
+	r.bottom = bufferHeight;
 	AdjustWindowRectEx(&r, style, 0, extendedStyle);
 
 	HWND mainWindow = CreateWindowEx(
@@ -60,19 +79,24 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		hInstance,
 		0);
 
+	if (fullScreen)
+	{
+		SetWindowLong(mainWindow, GWL_STYLE, 0);
+	}
+
 	ShowWindow(mainWindow, nChowCmd);
 
 	{ /* Define bitmap info */
 		BITMAPINFOHEADER* h = &bitmapInfo.bmiHeader;
 		h->biSize = sizeof(*h);
-		h->biWidth = WINDOW_WIDTH;
-		h->biHeight = WINDOW_HEIGHT;
+		h->biWidth = bufferWidth;
+		h->biHeight = bufferHeight;
 		h->biPlanes = 1;
 		h->biBitCount = 32;
 		h->biCompression = BI_RGB;
 	}
 
-	backBuffer = malloc(WINDOW_WIDTH * WINDOW_HEIGHT * 4);
+	backBuffer = malloc(bufferWidth * bufferHeight * 4);
 	if (!backBuffer)
 	{
 		MessageBox(NULL, "Failed to malloc backBuffer", "Failure", 0);
@@ -90,15 +114,15 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		}
 
 		int* ptr = (int*)backBuffer;
-		for (size_t h = 0; h < WINDOW_HEIGHT; ++h)
+		for (size_t h = 0; h < bufferHeight; ++h)
 		{
-			for (size_t w = 0; w < WINDOW_WIDTH; ++w)
+			for (size_t w = 0; w < bufferWidth; ++w)
 			{
-				char red = 0xFF;
-				char green = 0;
-				char blue = 0;
+				char red = rand() % 256;
+				char green = rand() % 256;
+				char blue = rand() % 256;
 
-				*ptr = ((red << 16) | (green << 8) | blue);
+				*ptr = ((red << 16) | (green << 8) | blue << 0);
 				ptr++;
 			}
 		}
@@ -107,8 +131,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 		StretchDIBits(
 			dc,
-			0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
-			0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+			0, 0, bufferWidth, bufferHeight,
+			0, 0, bufferWidth, bufferHeight,
 			backBuffer,
 			&bitmapInfo,
 			DIB_RGB_COLORS,
