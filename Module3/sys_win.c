@@ -1,16 +1,17 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
+
 #include "Color.h"
 
 static int bufferWidth = 640;
 static int bufferHeight = 480;
 static int bytesPerPixel = 1;
 static BOOL fullscreen = FALSE;
-void* backBuffer = NULL;
+static void* backBuffer = NULL;
 
 static int isRunning = 1;
-
 
 typedef struct dibinfo_s
 {
@@ -20,7 +21,7 @@ typedef struct dibinfo_s
 
 dibinfo_t bitmapInfo = { 0 };
 
-void DrawRect8(int a_StartX, int a_StartY, int a_Width, int a_Height, int a_PaletteIdx, unsigned char* a_Buffer)
+void DrawRect8(int a_StartX, int a_StartY, int a_Width, int a_Height, int a_PaletteIdx, uint8_t* a_Buffer)
 {
 	// Don't draw if it's outside the buffer
 	if (a_StartX + a_Width < 0 || bufferWidth < a_StartX ||
@@ -114,12 +115,14 @@ LRESULT CALLBACK WindowProc(HWND a_Window, UINT a_Msg, WPARAM a_WParam, LPARAM a
 	return result;
 }
 
-int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nChowCmd)
+int CALLBACK WinMain(HINSTANCE a_Instance, HINSTANCE a_PrevInstance, LPSTR a_CmdLine, int a_ShowCmd)
 {
+	srand((unsigned int)time(NULL));
+
 	WNDCLASSEX wc = { 0 };
 	wc.cbSize = sizeof(wc);
 	wc.lpfnWndProc = WindowProc;
-	wc.hInstance = hInstance;
+	wc.hInstance = a_Instance;
 	wc.lpszClassName = "QuakeWindowClass";
 
 	RegisterClassEx(&wc);
@@ -163,7 +166,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		r.bottom - r.top,
 		NULL,
 		NULL,
-		hInstance,
+		a_Instance,
 		0);
 
 	if (fullscreen)
@@ -171,7 +174,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		SetWindowLong(mainWindow, GWL_STYLE, 0);
 	}
 
-	ShowWindow(mainWindow, nChowCmd);
+	ShowWindow(mainWindow, a_ShowCmd);
 
 	{ /* Define bitmap info */
 		BITMAPINFOHEADER* h = &bitmapInfo.header;
@@ -190,6 +193,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		return EXIT_FAILURE;
 	}
 
+	// Set the palette
 	if (bytesPerPixel == 1)
 	{
 		bitmapInfo.acolors[0].rgbRed = 0;
@@ -203,6 +207,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		}
 	}
 	
+	// Main loop
 	while (isRunning)
 	{
 		MSG msg;
