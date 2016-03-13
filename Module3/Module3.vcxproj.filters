@@ -18,5 +18,13 @@
     <ClCompile Include="sys_win.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Color.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

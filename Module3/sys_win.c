@@ -1,31 +1,41 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdint.h>
+#include "Color.h"
 
 static int bufferWidth = 640;
 static int bufferHeight = 480;
 static int bytesPerPixel = 4;
 static int isRunning = 1;
+static BOOL fullscreen = FALSE;
 
-typedef struct PixelColor_t
-{
-	// Funky windows layout
-	uint8_t b,
-			g,
-			r,
-			a;
-} PixelColor;
-
-PixelColor* m_backBuffer = NULL;
+Color* m_backBuffer = NULL;
 BITMAPINFO bitmapInfo = { 0 };
 
-void DrawRect(int a_StartX, int a_StartY, int a_Width, int a_Height, PixelColor a_Color, PixelColor* a_Buffer)
+void DrawRect(int a_StartX, int a_StartY, int a_Width, int a_Height, Color a_Color, Color* a_Buffer)
 {
-	for (int h = a_StartY; h < a_StartY + a_Height; ++h)
+	// Don't draw if it's outside the buffer
+	if (a_StartX < 0 || bufferWidth < a_StartX ||
+		a_StartY < 0 || bufferHeight < a_StartY)
 	{
-		for (int w = a_StartX; w < a_StartX + a_Width; ++w)
+		return;
+	}
+
+	// Clamp width and height
+	if (a_StartX + a_Width > bufferWidth)
+	{
+		a_Width = bufferWidth - a_StartX;
+	}
+	if (a_StartY + a_Height > bufferHeight)
+	{
+		a_Height = bufferHeight - a_StartY;
+	}
+
+	for (int y = a_StartY; y < a_StartY + a_Height; ++y)
+	{
+		for (int x = a_StartX; x < a_StartX + a_Width; ++x)
 		{
-			a_Buffer[h * bufferWidth + w] = a_Color;
+			a_Buffer[y * bufferWidth + x] = a_Color;
 		}
 	}
 }
@@ -61,8 +71,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	DWORD extendedStyle = 0;
 	DWORD style = WS_OVERLAPPEDWINDOW;
 
-	BOOL fullScreen = TRUE;
-	if (fullScreen)
+	if (fullscreen)
 	{
 		DEVMODE dmScreenSettings = { 0 };
 		dmScreenSettings.dmSize = sizeof(dmScreenSettings);
@@ -78,7 +87,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		}
 		else
 		{
-			fullScreen = FALSE;
+			fullscreen = FALSE;
 		}
 	}
 
@@ -101,7 +110,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		hInstance,
 		0);
 
-	if (fullScreen)
+	if (fullscreen)
 	{
 		SetWindowLong(mainWindow, GWL_STYLE, 0);
 	}
@@ -118,8 +127,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 		h->biCompression = BI_RGB;
 	}
 
-	m_backBuffer = (PixelColor*)malloc(bufferWidth * bufferHeight * bytesPerPixel);
-	PixelColor* const backBuffer = m_backBuffer;
+	m_backBuffer = (Color*)malloc(bufferWidth * bufferHeight * bytesPerPixel);
+	Color* const backBuffer = m_backBuffer;
 	if (!backBuffer)
 	{
 		MessageBox(NULL, "Failed to malloc backBuffer", "Failure", 0);
@@ -136,12 +145,12 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			DispatchMessage(&msg);
 		}
 
-		PixelColor* ptr = backBuffer;
+		Color* ptr = backBuffer;
 		for (int h = 0; h < bufferHeight; ++h)
 		{
 			for (int w = 0; w < bufferWidth; ++w)
 			{
-				PixelColor pc = { 0 };
+				Color pc = { 0 };
 				pc.r = rand() % 256;
 				pc.g = rand() % 256;
 				pc.b = rand() % 256;
@@ -150,9 +159,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			}
 		}
 
-		PixelColor pc = { 0 };
-		pc.r = 255;
-		DrawRect(100, 100, 100, 100, pc, backBuffer);
+		DrawRect(100, 100, 4000000, 300, COLOR_GREEN, backBuffer);
 
 		HDC dc = GetDC(mainWindow);
 
